@@ -14,7 +14,8 @@ import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
+BASE_DIR_RELATIVE = 'api/uploads'
+BASE_DIR_UPLOADS = os.path.join(BASE_DIR, BASE_DIR_RELATIVE)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
@@ -149,6 +150,7 @@ CELERY_RESULT_SERIALIZER = 'json'
 TEST_BASE_DIRS = [
     os.path.join(BASE_DIR, 'sample-tests'),
     os.path.join(BASE_DIR, 'api/tests'),
+    os.path.join(BASE_DIR, BASE_DIR_RELATIVE),
 ]
 TEST_RUN_REQUEST_TIMEOUT_SECONDS = 60 * 60 * 30  # 30 Minutes
 TEST_BASE_CMD = ['pytest', '-v']

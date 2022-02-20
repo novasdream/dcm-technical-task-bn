@@ -1,9 +1,13 @@
+import logging
+import os
 from django.conf import settings
 from django.db import models
 
 from api.utils import ExtendedEnum
+from ionos.settings import BASE_DIR
 
 
+logger = logging.getLogger(__name__)
 class Timestampable(models.Model):
     updated_at = models.DateTimeField('date updated', auto_now=True)
     created_at = models.DateTimeField('date created', auto_now_add=True)
@@ -13,11 +17,10 @@ class Timestampable(models.Model):
 
 
 class TestFilePath(Timestampable):
-    path = models.CharField(max_length=1024)
+    path = models.CharField(max_length=1024, unique=True)
 
     def __str__(self):
         return self.path
-
 
 class TestEnvironment(Timestampable):
     class StatusChoices(ExtendedEnum):
@@ -39,12 +42,14 @@ class TestEnvironment(Timestampable):
         if self.is_busy():
             raise RuntimeError(f'Trying to lock a busy env(id: {self.id})')
         self.status = TestEnvironment.StatusChoices.BUSY.name
+        logger.info('Locked env(id: {0})'.format(self.id))
         self.save()
 
     def unlock(self):
         if self.is_idle():
             raise RuntimeError(f'Trying to unlock an idle env(id: {self.id})')
         self.status = TestEnvironment.StatusChoices.IDLE.name
+        logger.info('Unlocking env(id: {0})'.format(self.id))
         self.save()
 
 
