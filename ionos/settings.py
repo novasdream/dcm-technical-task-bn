@@ -136,9 +136,12 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'frontend', "build", "static"),
 )
 
+REDIS_HOST='redis'
+REDIS_PORT='6379'
+
 # CELERY SETTINGS
-CELERY_BROKER_URL = 'redis://redis:6379'
-CELERY_RESULT_BACKEND = 'redis://redis:6379'
+CELERY_BROKER_URL = 'redis://'+REDIS_HOST+':'+REDIS_PORT
+CELERY_RESULT_BACKEND = 'redis://'+REDIS_HOST+':'+REDIS_PORT
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
