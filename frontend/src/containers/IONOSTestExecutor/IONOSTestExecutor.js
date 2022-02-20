@@ -6,6 +6,7 @@ import TestExecutionTable from './../../components/TestExecutionTable/TestExecut
 import axios from './../../axios-api'
 import TestItemDetails from "../../components/TestItemDetails/TestItemDetails";
 import AddNewRequest from "../../components/AddNewRequest/AddNewRequest";
+import AddNewTest from '../../components/AddNewTest/AddNewTest';
 
 
 class IONOSTestExecutor extends Component {
@@ -22,10 +23,16 @@ class IONOSTestExecutor extends Component {
     requester: '',
     env: '',
     testPath: [],
+    newTestFile: '',
+    newTestFileError: ''
   };
 
   interval = null
 
+  constructor(props) {
+    super(props)
+    this.fileInput = React.createRef();
+  }
   componentDidMount () {
     axios.get('assets').then(response => {
       this.setState({assets: response.data})
@@ -60,6 +67,23 @@ class IONOSTestExecutor extends Component {
     if (this.state.itemID !== null){
       this.viewItemDetails(this.state.itemID)
     }
+  }
+
+  uploadNewTestFile = () => {
+    if (this.fileInput.current.files.length < 1) {
+      return
+    }
+    let form = new FormData();
+    console.log(this.fileInput.current.files[0])
+    form.append('file', this.fileInput.current.files[0], this.fileInput.current.files[0].name);
+
+    axios.post('test-file', form, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+    })
+    .then(() => {console.log('uploaded')})
+    .finally(() => console.log('finally'))
   }
 
   submitTest = () => {
@@ -115,6 +139,11 @@ class IONOSTestExecutor extends Component {
     }
     return (
         <Aux>
+          <AddNewTest
+            fileInput={this.fileInput}
+            newTestFileError={this.state.newTestFileError}
+            uploadTestFile={_ => this.uploadNewTestFile()}
+          />
           <AddNewRequest
               requester={this.state.requester}
               requesterError={this.state.requesterError}
