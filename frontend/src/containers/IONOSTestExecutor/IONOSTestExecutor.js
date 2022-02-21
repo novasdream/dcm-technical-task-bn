@@ -6,6 +6,7 @@ import TestExecutionTable from './../../components/TestExecutionTable/TestExecut
 import axios from './../../axios-api'
 import TestItemDetails from "../../components/TestItemDetails/TestItemDetails";
 import AddNewRequest from "../../components/AddNewRequest/AddNewRequest";
+import AddNewTest from '../../components/AddNewTest/AddNewTest';
 
 
 class IONOSTestExecutor extends Component {
@@ -22,16 +23,26 @@ class IONOSTestExecutor extends Component {
     requester: '',
     env: '',
     testPath: [],
+    newTestFileStatus: 'idle',
+    newTestFile: '',
+    newTestFileError: ''
   };
 
   interval = null
 
-  componentDidMount () {
+  constructor(props) {
+    super(props)
+    this.fileInput = React.createRef();
+  }
+  updateAssets() {
     axios.get('assets').then(response => {
       this.setState({assets: response.data})
     }).catch(error => {
       this.setState({error: true})
     })
+  }
+  componentDidMount () {
+    this.updateAssets()
 
     this.interval = setInterval(this.refreshList, 1000);
     this.refreshList()
@@ -60,6 +71,35 @@ class IONOSTestExecutor extends Component {
     if (this.state.itemID !== null){
       this.viewItemDetails(this.state.itemID)
     }
+  }
+
+  uploadNewTestFile = () => {
+    if (this.fileInput.current.files.length < 1) {
+      return
+    }
+    let form = new FormData();
+    console.log(this.fileInput.current.files[0])
+    form.append('file', this.fileInput.current.files[0], this.fileInput.current.files[0].name);
+    this.setState({newTestFileStatus: 'uploading'})
+    axios.post('test-file', form, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+    })
+    .then(() => {
+      alert('File uploaded successfully')
+      this.updateAssets()
+    })
+    .catch(error => {
+      if (error?.response?.data?.file[0]) {
+        alert(error?.response?.data?.file[0])
+      } else {
+        alert('Error uploading file')
+      }
+    })
+    .finally(() => {
+      this.setState({newTestFileStatus: 'idle'})
+    })
   }
 
   submitTest = () => {
@@ -115,6 +155,12 @@ class IONOSTestExecutor extends Component {
     }
     return (
         <Aux>
+          <AddNewTest
+            fileInput={this.fileInput}
+            newTestFileError={this.state.newTestFileError}
+            uploadTestFile={_ => this.uploadNewTestFile()}
+            status={this.state.newTestFileStatus}
+          />
           <AddNewRequest
               requester={this.state.requester}
               requesterError={this.state.requesterError}

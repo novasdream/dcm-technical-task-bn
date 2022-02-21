@@ -1,6 +1,14 @@
+import os
 from rest_framework import serializers
 
 from api.models import TestRunRequest, TestFilePath, TestEnvironment
+from api.utils import validate_file_name_to_upload_input
+class UploadNewTestFileSerializer(serializers.Serializer):
+    file = serializers.FileField(
+        allow_empty_file=False,
+        max_length=300,
+        validators=[validate_file_name_to_upload_input]
+    )
 
 
 class TestRunRequestSerializer(serializers.ModelSerializer):

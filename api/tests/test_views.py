@@ -6,7 +6,7 @@ from rest_framework import status
 
 from api.models import TestRunRequest, TestEnvironment, TestFilePath
 
-
+from django.core.files.uploadedfile import SimpleUploadedFile
 class TestTestRunRequestAPIView(TestCase):
 
     def setUp(self) -> None:
@@ -152,3 +152,20 @@ class TestAssetsAPIView(TestCase):
         response = self.client.get(self.url)
         self.assertEqual(status.HTTP_200_OK, response.status_code)
         self.assertEqual({'k': 'v'}, response.json())
+
+class TestNewFileUploadAPIView(TestCase):
+
+    def setUp(self) -> None:
+        self.url = reverse('test_upload_file_req')
+
+    def test_upload_fine_file(self):
+        response = self.client.post(self.url, data={'file': SimpleUploadedFile('uploaded_file.py', b'hello world')})
+        self.assertEqual(status.HTTP_201_CREATED, response.status_code)
+    
+    def test_upload_invalid_file_name(self):
+        response = self.client.post(self.url, data={'file': SimpleUploadedFile('uploaded_file.txt', b'hello world')})
+        self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
+    
+    def test_upload_unsecure_file_path(self):
+        response = self.client.post(self.url, data={'file': SimpleUploadedFile('__init__.py', b'hello world')})
+        self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
