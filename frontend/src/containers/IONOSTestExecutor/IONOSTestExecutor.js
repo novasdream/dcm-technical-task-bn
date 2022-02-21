@@ -23,6 +23,7 @@ class IONOSTestExecutor extends Component {
     requester: '',
     env: '',
     testPath: [],
+    newTestFileStatus: 'idle',
     newTestFile: '',
     newTestFileError: ''
   };
@@ -33,12 +34,15 @@ class IONOSTestExecutor extends Component {
     super(props)
     this.fileInput = React.createRef();
   }
-  componentDidMount () {
+  updateAssets() {
     axios.get('assets').then(response => {
       this.setState({assets: response.data})
     }).catch(error => {
       this.setState({error: true})
     })
+  }
+  componentDidMount () {
+    this.updateAssets()
 
     this.interval = setInterval(this.refreshList, 1000);
     this.refreshList()
@@ -76,14 +80,26 @@ class IONOSTestExecutor extends Component {
     let form = new FormData();
     console.log(this.fileInput.current.files[0])
     form.append('file', this.fileInput.current.files[0], this.fileInput.current.files[0].name);
-
+    this.setState({newTestFileStatus: 'uploading'})
     axios.post('test-file', form, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
     })
-    .then(() => {console.log('uploaded')})
-    .finally(() => console.log('finally'))
+    .then(() => {
+      alert('File uploaded successfully')
+      this.updateAssets()
+    })
+    .catch(error => {
+      if (error?.response?.data?.file[0]) {
+        alert(error?.response?.data?.file[0])
+      } else {
+        alert('Error uploading file')
+      }
+    })
+    .finally(() => {
+      this.setState({newTestFileStatus: 'idle'})
+    })
   }
 
   submitTest = () => {
@@ -143,6 +159,7 @@ class IONOSTestExecutor extends Component {
             fileInput={this.fileInput}
             newTestFileError={this.state.newTestFileError}
             uploadTestFile={_ => this.uploadNewTestFile()}
+            status={this.state.newTestFileStatus}
           />
           <AddNewRequest
               requester={this.state.requester}

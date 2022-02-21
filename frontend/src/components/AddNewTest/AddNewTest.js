@@ -21,7 +21,13 @@ class AddNewTest extends Component {
                       <p className="error-message">{this.props.newTestFileError}</p>
                     </div>
                     <div className="col-md-2">
-                      <input data-testid='submitButton' type="button" className="btn btn-primary" value="Submit" onClick={this.props.uploadTestFile}/>
+                      {
+                        this.props.status === 'uploading' &&  <div class="spinner-border text-primary" role="status"> <span class="sr-only">Loading...</span></div>
+                      }
+                      {
+                        this.props.status === 'idle' &&  <input data-testid='submitButton' type="button" className="btn btn-primary" value="Submit" onClick={this.props.uploadTestFile}/>
+                      }
+                      
                     </div>
                   </div>
                 </form>
